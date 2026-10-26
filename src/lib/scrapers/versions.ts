@@ -1,11 +1,12 @@
 import { load } from "cheerio";
 
+import { curlText } from "../../utils/http";
 import { isNotNull } from "../../utils/typescript";
 import { withBaseUrl } from "../utils";
 
 export function getVersions(repoPageUrl: string) {
-  return fetch(repoPageUrl)
-    .then(res => res.text())
+  return curlText(repoPageUrl)
+    .then(res => res.text)
     .then(extractVersions);
 }
 

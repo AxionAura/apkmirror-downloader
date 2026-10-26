@@ -15,7 +15,8 @@ export function withBaseUrl(endpoint: string) {
 }
 
 export function makeRepoUrl({ org, repo }: App) {
-  return withBaseUrl(`/apk/${org}/${repo}`);
+  // APKMirror's firewall rejects directory paths without a trailing slash.
+  return withBaseUrl(`/apk/${org}/${repo}/`);
 }
 
 export function makeVariantsUrl({ org, repo }: App, version: string) {

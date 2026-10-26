@@ -1,7 +1,10 @@
 import { existsSync } from "fs";
+import { rename, rm } from "fs/promises";
+import { dirname } from "path";
 
 import { match } from "ts-pattern";
 
+import { curlDownloadFile } from "../utils/http";
 import { cleanObject } from "../utils/object";
 import { ensureExtension } from "../utils/path";
 import type { LooseAutocomplete } from "../utils/types";
@@ -130,20 +133,24 @@ export class APKMirrorDownloader {
 
     const finalDownloadUrl = await getFinalDownloadUrl(selectedVariant.url);
 
-    return fetch(finalDownloadUrl).then(async res => {
-      const filename = extractFileNameFromUrl(res.url);
-      const extension = filename.split(".").pop()!;
+    const outDir = o.outDir ?? ".";
+    const { url: finalUrl, bodyPath } = await curlDownloadFile(
+      finalDownloadUrl,
+      { workDir: outDir },
+    );
 
-      const outDir = o.outDir ?? ".";
-      const outFile = ensureExtension(o.outFile ?? filename, extension);
-      const dest = `${outDir}/${outFile}`;
+    const filename = extractFileNameFromUrl(finalUrl);
+    const extension = filename.split(".").pop()!;
 
-      if (!o.overwrite && existsSync(dest)) {
-        return { dest, skipped: true as const };
-      }
+    const outFile = ensureExtension(o.outFile ?? filename, extension);
+    const dest = `${outDir}/${outFile}`;
 
-      await Bun.write(dest, res);
-      return { dest, skipped: false as const };
-    });
+    if (!o.overwrite && existsSync(dest)) {
+      await rm(dirname(bodyPath), { recursive: true, force: true });
+      return { dest, skipped: true as const };
+    }
+
+    await rename(bodyPath, dest);
+    return { dest, skipped: false as const };
   }
 }

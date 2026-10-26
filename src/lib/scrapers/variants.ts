@@ -1,6 +1,7 @@
 import { load } from "cheerio";
 import { match } from "ts-pattern";
 
+import { curlText } from "../../utils/http";
 import { isNotNull } from "../../utils/typescript";
 import { SUPPORTED_APP_TYPES } from "../types";
 import { withBaseUrl } from "../utils";
@@ -8,13 +9,13 @@ import { withBaseUrl } from "../utils";
 export class RedirectError extends Error {}
 
 export function getVariants(variantsPageUrl: string) {
-  return fetch(variantsPageUrl)
+  return curlText(variantsPageUrl)
     .then(res => {
       if (res.redirected) {
         throw new RedirectError(res.url);
       }
 
-      return res.text();
+      return res.text;
     })
     .then(extractVariants);
 }

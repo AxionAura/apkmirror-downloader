@@ -16,6 +16,11 @@ bun add apkmirror-downloader
 
 Or use any other package manager like `yarn` or `pnpm`
 
+> [!NOTE]
+> `curl` must be available on your `PATH`. APKMirror's Cloudflare protection
+> blocks HTTP clients by their TLS fingerprint (Node's built-in `fetch` gets
+> challenged), while curl passes, so all requests are made through it.
+
 ## 📃 Usage
 
 ```ts
